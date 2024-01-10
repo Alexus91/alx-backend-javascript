@@ -1,6 +1,6 @@
 function updateUniqueItems(groceriesMap) {
   if (!(groceriesMap instanceof Map)) {
-    throw new Error("Cannot process");
+    throw new Error('Cannot process');
   }
 
   for (const [item, quantity] of groceriesMap.entries()) {

@@ -2,9 +2,9 @@ function cleanSet(set, startString) {
   const str = [];
 
   if (
-    typeof set !== 'object' ||
-    typeof startString !== 'string' ||
-    startString.length === 0
+    typeof set !== 'object'
+    || typeof startString !== 'string'
+    || startString.length === 0
   ) {
     return '';
   }
@@ -19,4 +19,3 @@ function cleanSet(set, startString) {
 }
 
 export default cleanSet;
-
