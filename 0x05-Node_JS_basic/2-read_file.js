@@ -2,9 +2,9 @@
 const fs = require('fs');
 
 /**
- * Counts all students in a CSV data file.
- * @param {String} path to the CSV data file.
- * @throws {Error} the database cannot be loaded.
+ * Counts the students in a CSV data file.
+ * @param {String} dataPath The path to the CSV data file.
+ * @throws {Error} If the database cannot be loaded.
  */
 const countStudents = (dataPath) => {
   if (!fs.existsSync(dataPath) || !fs.statSync(dataPath).isFile()) {
@@ -20,6 +20,7 @@ const countStudents = (dataPath) => {
     const studentPropValues = studentRecord.slice(0, -1);
     const field = studentRecord[studentRecord.length - 1];
     groups[field] = groups[field] || [];
+    // eslint-disable-next-line max-len
     groups[field].push(Object.fromEntries(studentPropNames.map((propName, idx) => [propName, studentPropValues[idx]])));
     return groups;
   }, {});
