@@ -1,76 +1,53 @@
-const assert = require('assert');
-const http = require('http');
+const request = require('request');
+const { expect } = require('chai');
 
-const BASE_URL = 'http://localhost:7866';
-const LOGIN_URL = `${BASE_URL}/login`;
-const PAYMENTS_URL = `${BASE_URL}/available_payments`;
+describe('API integration test', () => {
+  const API_URL = 'http://localhost:7865';
 
-// Test the /login endpoint
-describe('/login', () => {
-  it('should return a welcome message with the username', () => new Promise((done) => {
-    const payload = JSON.stringify({ userName: 'john_doe' });
-
-    const options = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      url: LOGIN_URL,
-      body: payload,
-    };
-
-    const req = http.request(options, (res) => {
-      let data = '';
-
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-
-      res.on('end', () => {
-        const body = JSON.parse(data);
-
-        assert.strictEqual(res.statusCode, 200);
-
-        assert.strictEqual(body.message, 'Welcome john_doe');
-
-        done();
-      });
+  it('GET / returns correct response', (done) => {
+    request.get(`${API_URL}/`, (_err, res, body) => {
+      expect(res.statusCode).to.be.equal(200);
+      expect(body).to.be.equal('Welcome to the payment system');
+      done();
     });
+  });
 
-    req.write(payload);
-
-    req.end();
-  }));
-});
-
-describe('/available_payments', () => {
-  it('should return the list of available payments', () => new Promise((done) => {
-    const options = {
-      method: 'GET',
-      url: PAYMENTS_URL,
-    };
-
-    const req = http.request(options, (res) => {
-      let data = '';
-
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-
-      res.on('end', () => {
-        const body = JSON.parse(data);
-
-        assert.strictEqual(res.statusCode, 200);
-
-        assert.deepStrictEqual(body, {
-          payment_methods: {
-            credit_cards: true,
-            paypal: false,
-          },
-        });
-
-        done();
-      });
+  it('GET /cart/:id returns correct response for valid :id', (done) => {
+    request.get(`${API_URL}/cart/47`, (_err, res, body) => {
+      expect(res.statusCode).to.be.equal(200);
+      expect(body).to.be.equal('Payment methods for cart 47');
+      done();
     });
+  });
 
-    req.end();
-  }));
+  it('GET /cart/:id returns 404 response for negative number values in :id', (done) => {
+    request.get(`${API_URL}/cart/-47`, (_err, res, _body) => {
+      expect(res.statusCode).to.be.equal(404);
+      done();
+    });
+  });
+
+  it('GET /cart/:id returns 404 response for non-numeric values in :id', (done) => {
+    request.get(`${API_URL}/cart/d200-44a5-9de6`, (_err, res, _body) => {
+      expect(res.statusCode).to.be.equal(404);
+      done();
+    });
+  });
+
+  it('POST /login returns valid response', (done) => {
+    request.post(`${API_URL}/login`, {json: {userName: 'Pinkbrook'}}, (_err, res, body) => {
+      expect(res.statusCode).to.be.equal(200);
+      expect(body).to.be.equal('Welcome Pinkbrook');
+      done();
+    });
+  });
+
+  it('GET /available_payments returns valid response', (done) => {
+    request.get(`${API_URL}/available_payments`, (_err, res, body) => {
+      expect(res.statusCode).to.be.equal(200);
+      expect(JSON.parse(body))
+        .to.be.deep.equal({payment_methods: {credit_cards: true, paypal: false}});
+      done();
+    });
+  });
 });
